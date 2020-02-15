@@ -16,16 +16,15 @@ Keep the responsibilities separated as best you can:
 5. Rather user input and taking the appropriate actions
 */
 let process = require('process');
-let command = process.argv[2];
-let secondCommand = process.argv[3];
-// takes the third argument because the first two are the node and the location of the file
 let fs = require('fs');
-
 // file system, reads files
 
-function openAndRead(filename) {
+function openAndReadFile(filename) {
   let text = fs.readFileSync(filename, 'utf-8');
   text = text.split('\n');
+  return text;
+}
+function printList(text) {
   console.log('Here is your list!');
   for (let i = 0; i < text.length - 1; i += 1) {
     console.log(` ${i + 1}. ${text[i]} `);
@@ -33,36 +32,44 @@ function openAndRead(filename) {
   }
 }
 
-function writingList() { // no parameter because command is on the command line
-  if (command === 'list') {
-    openAndRead('todos.txt');
-    // takes the information from the other function, any variables from there, edit that function
-  }
+function addToList(text, addition) {
+  console.log(`Appending '${addition}' to your TODO list`);
+  console.log();
+  fs.appendFileSync('todos.txt', addition);
+  // first parameter is the text file you add it to, next is what you're adding
+  // use appendFileSync to write into a new file but APPEND to it rather than create an entirely new file
+  // writeFileSync can completely create a new text file
+  console.log('Your list is newly updated.');
 }
 
-function addToList() {
-  let addition = (`${secondCommand} \n`);
-  // includes an entire string in the 3rd index
-  if (command === 'add') {
-    console.log(`Appending '${secondCommand}' to your TODO list`);
-    console.log();
-    fs.appendFileSync('todos.txt', addition);
-    // first parameter is the text file you add it to, next is what you're adding
-    // use appendFileSync to write into a new file but APPEND to it rather than create an entirely new file
-    // writeFileSync can completely create a new text file
-    console.log('Your list is newly updated.');
-    console.log(openAndRead('todos.txt'));
-  }
-}
+function deleteFromList(text, deletion) {
+  text = text.split['\n'];
+  for (let line of text) {
+    if (line === deletion) {
 
-function deleteFromList() {
-  if (command === 'delete') {
-    console.log(`Deleting '${secondCommand}' from your TODO list`);
-    fs.writeFileSync('todos.txt', 'todos.txt'[-1], secondCommand);
-    console.log('here is your new list');
-    console.log(openAndRead('todos.txt'));
+    }
   }
 }
-writingList();
-addToList();
-deleteFromList();
+let command = process.argv[2];
+let todoFileName = './todos.txt';
+
+if (command === 'list') {
+  printList(openAndReadFile(todoFileName));
+  // don't want to mix the code and the print out, so you put the code out here to use that
+} else if (command === 'add') {
+  let taskDescription = `${process.argv[3]} \n`;
+  addToList(openAndReadFile(todoFileName), taskDescription);
+  printList(openAndReadFile(todoFileName)); //
+} else if (command === 'delete') {
+  let taskPosition = Number(process.argv[3]);
+
+  if (Number.isNaN(taskPosition)) {
+    console.log('You entered an invalid number.');
+    process.exit();
+  }
+
+  deleteFromList(todoFileName, taskPosition);
+} else {
+  console.log(`Unknown command: '${command}'`);
+  process.exit();
+}
