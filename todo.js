@@ -27,29 +27,34 @@ function openAndReadFile(filename) {
 function printList(text) {
   console.log('Here is your list!');
   for (let i = 0; i < text.length - 1; i += 1) {
-    console.log(` ${i + 1}. ${text[i]} `);
+    console.log(` [] ${i + 1}. ${text[i]} `);
     // prints out the literal string, you put the data within the ${} when it is a variable and not a string
   }
 }
 
-function addToList(text, addition) {
+function addToList(filename, addition) {
   console.log(`Appending '${addition}' to your TODO list`);
   console.log();
-  fs.appendFileSync('todos.txt', addition);
+  fs.appendFileSync(filename, addition);
+  fs.appendFileSync(filename, '\n');
   // first parameter is the text file you add it to, next is what you're adding
   // use appendFileSync to write into a new file but APPEND to it rather than create an entirely new file
   // writeFileSync can completely create a new text file
   console.log('Your list is newly updated.');
 }
 
-function deleteFromList(text, deletion) {
-  text = text.split['\n'];
-  for (let line of text) {
-    if (line === deletion) {
-
+function deleteFromList(text, deleteTask, filename) {
+  for (let i = 0; i < text.length + 1; i += 1) {
+    if (i === deleteTask) {
+      text.splice(i - 1, 1);
     }
   }
+  console.log('Congrats for finishing! Your list is updated.');
+  console.log(printList(text));
+  text = text.join('');
+  fs.writeFileSync(filename, text);
 }
+
 let command = process.argv[2];
 let todoFileName = './todos.txt';
 
@@ -57,8 +62,8 @@ if (command === 'list') {
   printList(openAndReadFile(todoFileName));
   // don't want to mix the code and the print out, so you put the code out here to use that
 } else if (command === 'add') {
-  let taskDescription = `${process.argv[3]} \n`;
-  addToList(openAndReadFile(todoFileName), taskDescription);
+  let taskDescription = process.argv[3];
+  addToList(todoFileName, taskDescription);
   printList(openAndReadFile(todoFileName)); //
 } else if (command === 'delete') {
   let taskPosition = Number(process.argv[3]);
@@ -68,7 +73,7 @@ if (command === 'list') {
     process.exit();
   }
 
-  deleteFromList(todoFileName, taskPosition);
+  deleteFromList(openAndReadFile(todoFileName), taskPosition, 'todos.txt');
 } else {
   console.log(`Unknown command: '${command}'`);
   process.exit();
